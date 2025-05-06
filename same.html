@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>JS to Python Converter</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 40px;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      color: #333;
+      box-sizing: border-box;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    img {
+      display: block;
+      margin: 0 auto 20px auto;
+      max-width: 100px;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    }
+
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      margin-bottom: 15px;
+      font-family: monospace;
+      font-size: 16px;
+      padding: 10px;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #2980b9;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <img src="iconri.png" alt="Converter Icon">
+
+    <h2>JavaScript to Python Converter</h2>
+
+    <label>JavaScript Input:</label><br>
+    <textarea id="jsInput" placeholder="Enter JavaScript code here..."></textarea><br>
+
+    <button onclick="convertCode()">Convert to Python</button>
+    <button onclick="clearInput()">Clear Input</button>
+    <button onclick="clearOutput()">Clear Output</button>
+
+    <br><br>
+
+    <label>Python Output:</label><br>
+    <textarea id="pyOutput" placeholder="Python code will appear here..."></textarea>
+  </div>
+
+  <script>
+    function convertCode() {
+      const jsCode = document.getElementById("jsInput").value;
+      let pythonCode = jsCode;
+
+      pythonCode = pythonCode.replace(/console\.log/g, 'print');
+      pythonCode = pythonCode.replace(/;/g, '');
+      pythonCode = pythonCode.replace(/var |let |const /g, '');
+      pythonCode = pythonCode.replace(/===/g, '==');
+      pythonCode = pythonCode.replace(/!==/g, '!=');
+      pythonCode = pythonCode.replace(/&&/g, 'and');
+      pythonCode = pythonCode.replace(/\|\|/g, 'or');
+      pythonCode = pythonCode.replace(/function\s+([a-zA-Z0-9_]+)\s*(.*?)\s*{/g, 'def $1($2):');
+      pythonCode = pythonCode.replace(/\/\/(.*)/g, '#$1');
+      pythonCode = pythonCode.replace(/{/g, '');
+      pythonCode = pythonCode.replace(/}/g, '');
+
+      document.getElementById("pyOutput").value = pythonCode;
+    }
+
+    function clearInput() {
+      document.getElementById("jsInput").value = '';
+    }
+
+    function clearOutput() {
+      document.getElementById("pyOutput").value = '';
+    }
+  </script>
+
+</body>
+</html>
