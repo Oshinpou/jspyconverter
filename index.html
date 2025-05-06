@@ -1,67 +1,167 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>JS to Python Converter</title>
+  <meta charset="UTF-8">
+  <title>AIcodejs Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      font-family: Arial, sans-serif;
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f8f9fa;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 20px;
+      background: #343a40;
+      color: white;
+    }
+    .logo {
+      height: 40px;
+    }
+    .titles h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .titles p {
+      margin: 0;
+      font-size: 14px;
+      color: #ccc;
+    }
+    .burger {
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .menu {
+      display: flex;
+      flex-direction: column;
+      background: #495057;
+      color: white;
+      padding: 10px 20px;
+    }
+    .menu a {
+      color: white;
+      text-decoration: none;
+      margin: 5px 0;
+    }
+    .menu.hidden {
+      display: none;
+    }
+    .features {
+      text-align: center;
+      padding: 30px 20px;
+    }
+    .features button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
       padding: 20px;
     }
-    textarea {
-      width: 100%;
-      height: 150px;
-      margin-bottom: 10px;
-      font-family: monospace;
-      font-size: 16px;
+    .product-card {
+      background: white;
+      border: 1px solid #dee2e6;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
     }
-    button {
-      margin: 5px;
-      padding: 10px 15px;
-      font-size: 16px;
+    .product-card:hover {
+      transform: scale(1.03);
+    }
+    .product-card a {
+      text-decoration: none;
+      color: #212529;
+    }
+    .product-card h2 {
+      color: #007bff;
+      margin: 10px 0 5px;
+    }
+    .product-card p {
+      margin: 0;
     }
   </style>
 </head>
 <body>
 
-  <h2>JavaScript to Python Converter</h2>
+  <div class="header">
+    <img src="iconr.webp" alt="AIcodejs Logo" class="logo">
+    <div class="titles">
+      <h1>AIcodejs</h1>
+      <p>Learn JavaScript in AI</p>
+    </div>
+    <div class="burger" onclick="toggleMenu()">☰</div>
+  </div>
 
-  <label>JavaScript Input:</label><br>
-  <textarea id="jsInput" placeholder="Enter JavaScript code here..."></textarea><br>
+  <div id="menu" class="menu hidden">
+    <!-- Sample 10 links -->
+    <a href="page1.html">Lesson 1</a>
+    <a href="page2.html">Lesson 2</a>
+    <a href="page3.html">Lesson 3</a>
+    <a href="page4.html">Lesson 4</a>
+    <a href="page5.html">Lesson 5</a>
+    <a href="page6.html">Lesson 6</a>
+    <a href="page7.html">Lesson 7</a>
+    <a href="page8.html">Lesson 8</a>
+    <a href="page9.html">Lesson 9</a>
+    <a href="page10.html">Lesson 10</a>
+  </div>
 
-  <button onclick="convertCode()">Convert to Python</button>
-  <button onclick="clearInput()">Clear Input</button>
-  <button onclick="clearOutput()">Clear Output</button>
+  <div class="features">
+    <h2>Welcome, <span id="username"></span>!</h2>
+    <p>You are now accessing full AI-powered JavaScript features.</p>
+    <button onclick="deleteAccount()">Delete Account</button>
+  </div>
 
-  <br><br>
-
-  <label>Python Output:</label><br>
-  <textarea id="pyOutput" placeholder="Python code will appear here..."></textarea>
+  <div class="product-grid">
+    <!-- 30 Product Cards -->
+    <script>
+      const productNames = [
+        "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+        "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty",
+        "twentyone", "twentytwo", "twentythree", "twentyfour", "twentyfive", "twentysix", "twentyseven", "twentyeight", "twentynine", "thirty"
+      ];
+      document.write(productNames.map((name, i) => `
+        <div class="product-card">
+          <a href="${name}.html">
+            <h2>Product ${i + 1}</h2>
+            <p>Click to explore Product ${i + 1} details.</p>
+          </a>
+        </div>`).join(""));
+    </script>
+  </div>
 
   <script>
-    function convertCode() {
-      const jsCode = document.getElementById("jsInput").value;
-      let pythonCode = jsCode;
+    const isLoggedIn = localStorage.getItem("user_logged_in");
+    const username = localStorage.getItem("username");
 
-      // Basic conversion rules (can be improved)
-      pythonCode = pythonCode.replace(/console\.log/g, 'print');
-      pythonCode = pythonCode.replace(/;/g, '');
-      pythonCode = pythonCode.replace(/var |let |const /g, '');
-
-      // Additional basic translation examples
-      pythonCode = pythonCode.replace(/===/g, '==');
-      pythonCode = pythonCode.replace(/!==/g, '!=');
-      pythonCode = pythonCode.replace(/&&/g, 'and');
-      pythonCode = pythonCode.replace(/\|\|/g, 'or');
-
-      document.getElementById("pyOutput").value = pythonCode;
+    if (isLoggedIn !== "true" || !username) {
+      window.location.href = "pay.html";
+    } else {
+      document.getElementById("username").textContent = username;
     }
 
-    function clearInput() {
-      document.getElementById("jsInput").value = '';
+    function deleteAccount() {
+      if (confirm("Are you sure you want to delete your account?")) {
+        localStorage.clear();
+        alert("Account deleted.");
+        window.location.href = "pay.html";
+      }
     }
 
-    function clearOutput() {
-      document.getElementById("pyOutput").value = '';
+    function toggleMenu() {
+      document.getElementById("menu").classList.toggle("hidden");
     }
   </script>
 
