@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>JS to Python Converter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      margin-bottom: 10px;
+      font-family: monospace;
+      font-size: 16px;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 15px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>JavaScript to Python Converter</h2>
+
+  <label>JavaScript Input:</label><br>
+  <textarea id="jsInput" placeholder="Enter JavaScript code here..."></textarea><br>
+
+  <button onclick="convertCode()">Convert to Python</button>
+  <button onclick="clearInput()">Clear Input</button>
+  <button onclick="clearOutput()">Clear Output</button>
+
+  <br><br>
+
+  <label>Python Output:</label><br>
+  <textarea id="pyOutput" placeholder="Python code will appear here..."></textarea>
+
+  <script>
+    function convertCode() {
+      const jsCode = document.getElementById("jsInput").value;
+      let pythonCode = jsCode;
+
+      // Basic conversion rules (can be improved)
+      pythonCode = pythonCode.replace(/console\.log/g, 'print');
+      pythonCode = pythonCode.replace(/;/g, '');
+      pythonCode = pythonCode.replace(/var |let |const /g, '');
+
+      // Additional basic translation examples
+      pythonCode = pythonCode.replace(/===/g, '==');
+      pythonCode = pythonCode.replace(/!==/g, '!=');
+      pythonCode = pythonCode.replace(/&&/g, 'and');
+      pythonCode = pythonCode.replace(/\|\|/g, 'or');
+
+      document.getElementById("pyOutput").value = pythonCode;
+    }
+
+    function clearInput() {
+      document.getElementById("jsInput").value = '';
+    }
+
+    function clearOutput() {
+      document.getElementById("pyOutput").value = '';
+    }
+  </script>
+
+</body>
+</html>
