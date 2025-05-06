@@ -91,6 +91,22 @@
     .product-card p {
       margin: 0;
     }
+  
+  .start-btn {
+  background-color: #0047ab;
+  color: white;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.start-btn:hover {
+  background-color: #002f6c;
+}
   </style>
 </head>
 <body>
@@ -98,8 +114,8 @@
   <div class="header">
     <img src="iconri.png" alt="AIcodejs Logo" class="logo">
     <div class="titles">
-      <h1>AIcodejs</h1>
-      <p>Learn JavaScript in AI</p>
+      <h1>JS2PY</h1>
+      <p>Convert JavaScript to Python</p>
     </div>
     <div class="burger" onclick="toggleMenu()">☰</div>
   </div>
@@ -123,24 +139,10 @@
     <p>You are now accessing full AI-powered JavaScript features.</p>
     <button onclick="deleteAccount()">Delete Account</button>
   </div>
+<!-- Place this where you want the button to appear -->
+<button class="start-btn" onclick="window.location.href='main.html'">Start Converter</button>
 
-  <div class="product-grid">
-    <!-- 30 Product Cards -->
-    <script>
-      const productNames = [
-        "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
-        "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty",
-        "twentyone", "twentytwo", "twentythree", "twentyfour", "twentyfive", "twentysix", "twentyseven", "twentyeight", "twentynine", "thirty"
-      ];
-      document.write(productNames.map((name, i) => `
-        <div class="product-card">
-          <a href="${name}.html">
-            <h2>Product ${i + 1}</h2>
-            <p>Click to explore Product ${i + 1} details.</p>
-          </a>
-        </div>`).join(""));
-    </script>
-  </div>
+
 
   <script>
     const isLoggedIn = localStorage.getItem("user_logged_in");
