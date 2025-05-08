@@ -1,68 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paragraph Shortener</title>
-    <!-- Add a simple styling for the page -->
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        textarea {
-            width: 100%;
-            height: 150px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-        }
-        button {
-            margin-top: 10px;
-            padding: 10px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        .output {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Paragraph Summarizer</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    textarea { width: 100%; height: 150px; }
+    button { margin-top: 10px; padding: 10px 20px; }
+    #summary { margin-top: 20px; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Paragraph Shortener</h1>
-        <textarea id="inputParagraph" placeholder="Enter your paragraph here..."></textarea><br>
-        <button onclick="shortenParagraph()">Shorten Paragraph</button>
+  <h1>Paragraph Summarizer</h1>
+  <textarea id="inputText" placeholder="Enter your paragraph here..."></textarea><br>
+  <button onclick="summarizeText()">Summarize</button>
+  <div id="summary"></div>
 
-        <div class="output" id="outputParagraph"></div>
-    </div>
-
-    <!-- Add the JS script -->
-    <script>
-        function shortenParagraph() {
-            // Get the input paragraph from the textarea
-            var paragraph = document.getElementById("inputParagraph").value;
-            
-            // Set the maximum length to shorten to (in characters)
-            var maxLength = 200;  // You can change this to any length you want
-            
-            // Check if the paragraph is longer than maxLength
-            if (paragraph.length > maxLength) {
-                // Shorten the paragraph and add ellipsis
-                var shortened = paragraph.substring(0, maxLength) + "...";
-                document.getElementById("outputParagraph").textContent = shortened;
-            } else {
-                // If the paragraph is short enough, show it as is
-                document.getElementById("outputParagraph").textContent = paragraph;
-            }
-        }
-    </script>
+  <!-- Include jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <!-- Include TextRank.js (ensure this path points to the actual library or implement the algorithm below) -->
+  <script src="textrank.js"></script>
+  <script>
+    function summarizeText() {
+      const text = document.getElementById('inputText').value;
+      const tr = new TextRank(text);
+      const summary = tr.getSummarizedText(); // Replace with actual method from the library
+      document.getElementById('summary').innerText = summary;
+    }
+  </script>
 </body>
 </html>
