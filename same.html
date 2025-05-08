@@ -4,28 +4,120 @@
   <meta charset="UTF-8">
   <title>Paragraph Summarizer</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    textarea { width: 100%; height: 150px; }
-    button { margin-top: 10px; padding: 10px 20px; }
-    #summary { margin-top: 20px; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f2f4f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 30px;
+      width: 90%;
+      max-width: 900px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 200px;
+      padding: 15px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      resize: vertical;
+      box-sizing: border-box;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+      justify-content: center;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #1d4ed8;
+    }
+
+    #output {
+      margin-top: 20px;
+      padding: 15px;
+      min-height: 150px;
+      background-color: #f1f5f9;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      white-space: pre-wrap;
+    }
   </style>
 </head>
 <body>
-  <h1>Paragraph Summarizer</h1>
-  <textarea id="inputText" placeholder="Enter your paragraph here..."></textarea><br>
-  <button onclick="summarizeText()">Summarize</button>
-  <div id="summary"></div>
+  <div class="container">
+    <h2>Smart Paragraph Summarizer</h2>
+    <textarea id="inputText" placeholder="Paste or write your paragraph here..."></textarea>
 
-  <!-- Include jQuery -->
-  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-  <!-- Include TextRank.js (ensure this path points to the actual library or implement the algorithm below) -->
-  <script src="textrank.js"></script>
+    <div class="buttons">
+      <button onclick="summarize()">Summarize</button>
+      <button onclick="copyOutput()">Copy Summary</button>
+      <button onclick="clearInput()">Clear Input</button>
+      <button onclick="clearOutput()">Clear Output</button>
+    </div>
+
+    <div id="output" placeholder="Your summary will appear here..."></div>
+  </div>
+
   <script>
-    function summarizeText() {
-      const text = document.getElementById('inputText').value;
-      const tr = new TextRank(text);
-      const summary = tr.getSummarizedText(); // Replace with actual method from the library
-      document.getElementById('summary').innerText = summary;
+    function summarize() {
+      const text = document.getElementById("inputText").value;
+      if (!text.trim()) {
+        document.getElementById("output").innerText = "Please enter a paragraph to summarize.";
+        return;
+      }
+
+      const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+      const summaryLength = Math.max(1, Math.floor(sentences.length / 3));
+      const summary = sentences.slice(0, summaryLength).join(' ');
+      document.getElementById("output").innerText = summary;
+    }
+
+    function copyOutput() {
+      const summary = document.getElementById("output").innerText;
+      if (!summary) return;
+      navigator.clipboard.writeText(summary).then(() => {
+        alert("Summary copied to clipboard!");
+      });
+    }
+
+    function clearInput() {
+      document.getElementById("inputText").value = "";
+    }
+
+    function clearOutput() {
+      document.getElementById("output").innerText = "";
     }
   </script>
 </body>
