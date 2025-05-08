@@ -1,44 +1,107 @@
-function markdownToHtml(markdown) {
-    const rules = [
-        { regex: /^###### (.*$)/gim, replacement: '<h6>$1</h6>' },
-        { regex: /^##### (.*$)/gim, replacement: '<h5>$1</h5>' },
-        { regex: /^#### (.*$)/gim, replacement: '<h4>$1</h4>' },
-        { regex: /^### (.*$)/gim, replacement: '<h3>$1</h3>' },
-        { regex: /^## (.*$)/gim, replacement: '<h2>$1</h2>' },
-        { regex: /^# (.*$)/gim, replacement: '<h1>$1</h1>' },
-        { regex: /\*\*(.*?)\*\*/gim, replacement: '<strong>$1</strong>' },
-        { regex: /\*(.*?)\*/gim, replacement: '<em>$1</em>' },
-        { regex: /!(.*?)(.*?)/gim, replacement: '<img alt="$1" src="$2">' },
-        { regex: /(.*?)(.*?)/gim, replacement: '<a href="$2">$1</a>' },
-        { regex: /`{3}([\s\S]*?)`{3}/gim, replacement: '<pre><code>$1</code></pre>' },
-        { regex: /`(.*?)`/gim, replacement: '<code>$1</code>' },
-        { regex: /^> (.*$)/gim, replacement: '<blockquote>$1</blockquote>' },
-        { regex: /^- (.*$)/gim, replacement: '<li>$1</li>' },
-        { regex: /^\d+\. (.*$)/gim, replacement: '<li>$1</li>' },
-        { regex: /\n\*\*\*/gim, replacement: '<hr>' },
-        { regex: /\n-{3,}/gim, replacement: '<hr>' },
-    ];
+// Load Esprima parser
+// Assumes Esprima is included via CDN in HTML
 
-    // Apply all rules
-    let html = markdown;
+function convertJsToPython(jsCode) {
+  let ast;
+  try {
+    ast = esprima.parseScript(jsCode);
+  } catch (e) {
+    return `Error parsing JavaScript: ${e.message}`;
+  }
 
-    for (const { regex, replacement } of rules) {
-        html = html.replace(regex, replacement);
+  let pythonCode = "";
+
+  function walk(node, indent = "") {
+    switch (node.type) {
+      case "Program":
+        node.body.forEach(statement => {
+          pythonCode += walk(statement, indent) + "\n";
+        });
+        break;
+
+      case "VariableDeclaration":
+        node.declarations.forEach(decl => {
+          pythonCode += indent + decl.id.name + " = " + walk(decl.init, indent);
+        });
+        break;
+
+      case "Literal":
+        return JSON.stringify(node.value);
+
+      case "Identifier":
+        return node.name;
+
+      case "ExpressionStatement":
+        return indent + walk(node.expression, indent);
+
+      case "BinaryExpression":
+        return `${walk(node.left)} ${node.operator} ${walk(node.right)}`;
+
+      case "FunctionDeclaration":
+        let params = node.params.map(p => p.name).join(", ");
+        pythonCode += indent + `def ${node.id.name}(${params}):\n`;
+        node.body.body.forEach(stmt => {
+          pythonCode += walk(stmt, indent + "    ") + "\n";
+        });
+        break;
+
+      case "ReturnStatement":
+        return indent + "return " + walk(node.argument, indent);
+
+      case "IfStatement":
+        pythonCode += indent + "if " + walk(node.test) + ":\n";
+        pythonCode += walk(node.consequent, indent + "   ") + "\n";
+        if (node.alternate) {
+          pythonCode += indent + "else:\n";
+          pythonCode += walk(node.alternate, indent + "   ") + "\n";
+        }
+        break;
+
+      case "BlockStatement":
+        return node.body.map(stmt => walk(stmt, indent)).join("\n");
+
+      case "WhileStatement":
+        pythonCode += indent + "while " + walk(node.test) + ":\n";
+        pythonCode += walk(node.body, indent + "   ") + "\n";
+        break;
+
+      case "ForStatement":
+        // Simplified version - only handles numeric for-loops like for (let i = 0; i < 10; i++)
+        let init = walk(node.init.declarations[0].init);
+        let name = node.init.declarations[0].id.name;
+        let end = walk(node.test.right);
+        pythonCode += indent + `for ${name} in range(${init}, ${end}):\n`;
+        pythonCode += walk(node.body, indent + "   ") + "\n";
+        break;
+
+      case "CallExpression":
+        let args = node.arguments.map(a => walk(a)).join(", ");
+        return `${walk(node.callee)}(${args})`;
+
+      default:
+        return indent + `# Unsupported node type: ${node.type}`;
     }
+    return "";
+  }
 
-    // Wrap list items with <ul> or <ol>
-    html = html.replace(/(<li>.*<\/li>)/gim, '<ul>$1</ul>');
-    html = html.replace(/(<ul>(<li>.*<\/li>)+<\/ul>)/gim, '$1');
-
-    // Remove extra newlines
-    html = html.replace(/\n{2,}/g, '<br><br>');
-
-    return html.trim();
+  walk(ast);
+  return pythonCode.trim();
 }
 
-// Usage example
-document.getElementById('convertBtn').addEventListener('click', () => {
-    const input = document.getElementById('markdownInput').value;
-    const output = markdownToHtml(input);
-    document.getElementById('output').innerHTML = output;
+// UI Hook
+document.querySelector('.convert-btn').addEventListener('click', async function () {
+  const jsCode = document.querySelector('#js-input').value;
+  const pyCode = convertJsToPython(jsCode);
+  document.querySelector('#output').innerText = pyCode;
+
+  // Optional Pyodide execution (if loaded and enabled)
+  if (window.runPyodide === true) {
+    try {
+      const pyodide = await loadPyodide();
+      const result = await pyodide.runPythonAsync(pyCode);
+      document.querySelector('#py-output').innerText = "Execution Result:\n" + result;
+    } catch (e) {
+      document.querySelector('#py-output').innerText = "Error running Python:\n" + e.message;
+    }
+  }
 });
