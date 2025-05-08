@@ -1,38 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Paragraph Summarizer</title>
+  <meta charset="UTF-8" />
+  <title>Smart Paragraph Summarizer</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
       margin: 0;
       padding: 0;
-      background: #f2f4f8;
+      background: #f9fafb;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
     }
-
     .container {
       background: #ffffff;
       padding: 30px;
       width: 90%;
-      max-width: 900px;
+      max-width: 960px;
       border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
-
     h2 {
       text-align: center;
       margin-bottom: 20px;
-      color: #333;
+      color: #111827;
     }
-
     textarea {
       width: 100%;
-      min-height: 200px;
+      min-height: 160px;
       padding: 15px;
       font-size: 16px;
       border: 1px solid #ccc;
@@ -40,7 +37,6 @@
       resize: vertical;
       box-sizing: border-box;
     }
-
     .buttons {
       display: flex;
       flex-wrap: wrap;
@@ -48,7 +44,6 @@
       margin-top: 15px;
       justify-content: center;
     }
-
     button {
       padding: 10px 20px;
       background-color: #2563eb;
@@ -57,18 +52,15 @@
       border-radius: 6px;
       cursor: pointer;
       font-size: 15px;
-      transition: background 0.3s;
     }
-
     button:hover {
       background-color: #1d4ed8;
     }
-
     #output {
       margin-top: 20px;
       padding: 15px;
-      min-height: 150px;
-      background-color: #f1f5f9;
+      min-height: 120px;
+      background-color: #f3f4f6;
       border: 1px solid #ccc;
       border-radius: 8px;
       white-space: pre-wrap;
@@ -79,28 +71,54 @@
   <div class="container">
     <h2>Smart Paragraph Summarizer</h2>
     <textarea id="inputText" placeholder="Paste or write your paragraph here..."></textarea>
-
     <div class="buttons">
       <button onclick="summarize()">Summarize</button>
       <button onclick="copyOutput()">Copy Summary</button>
       <button onclick="clearInput()">Clear Input</button>
       <button onclick="clearOutput()">Clear Output</button>
     </div>
-
     <div id="output" placeholder="Your summary will appear here..."></div>
   </div>
 
   <script>
+    function getWordFreq(text) {
+      const freq = {};
+      const words = text.toLowerCase().replace(/[^\w\s]/g, "").split(/\s+/);
+      for (const word of words) {
+        if (!freq[word]) freq[word] = 0;
+        freq[word]++;
+      }
+      return freq;
+    }
+
+    function scoreSentences(sentences, wordFreq) {
+      const scores = [];
+      for (const sentence of sentences) {
+        let score = 0;
+        const words = sentence.toLowerCase().replace(/[^\w\s]/g, "").split(/\s+/);
+        for (const word of words) {
+          if (wordFreq[word]) score += wordFreq[word];
+        }
+        scores.push({ sentence, score });
+      }
+      return scores;
+    }
+
     function summarize() {
-      const text = document.getElementById("inputText").value;
-      if (!text.trim()) {
-        document.getElementById("output").innerText = "Please enter a paragraph to summarize.";
+      const text = document.getElementById("inputText").value.trim();
+      if (!text) {
+        document.getElementById("output").innerText = "Please enter a paragraph.";
         return;
       }
 
       const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-      const summaryLength = Math.max(1, Math.floor(sentences.length / 3));
-      const summary = sentences.slice(0, summaryLength).join(' ');
+      const wordFreq = getWordFreq(text);
+      const scored = scoreSentences(sentences, wordFreq);
+
+      scored.sort((a, b) => b.score - a.score);
+
+      const topSentences = scored.slice(0, Math.ceil(sentences.length / 3));
+      const summary = topSentences.map(s => s.sentence.trim()).join(" ");
       document.getElementById("output").innerText = summary;
     }
 
