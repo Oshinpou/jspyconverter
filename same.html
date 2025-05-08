@@ -1,120 +1,203 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>JavaScript to Python Converter</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Libraries CDN -->
+  <!-- Parsing & AST -->
+  <script src="https://cdn.jsdelivr.net/npm/esprima@4.0.1/dist/esprima.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/acorn@8.7.1/dist/acorn.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/shift@0.4.1/dist/shift.min.js"></script>
+
+  <!-- AST Manipulation -->
+  <script src="https://cdn.jsdelivr.net/npm/estraverse@4.2.0/dist/estraverse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/recast@0.19.1/dist/recast.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/babel-generator@6.26.1/lib/index.min.js"></script>
+
+  <!-- Transformers -->
+  <script src="https://cdn.jsdelivr.net/npm/babel@6.26.0/browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jscodeshift@0.13.0/dist/jscodeshift.min.js"></script>
+
+  <!-- Sandboxing -->
+  <script src="https://cdn.jsdelivr.net/npm/iframe-sandbox@0.0.7/dist/iframe-sandbox.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vm2@3.9.5/lib/sandbox.min.js"></script>
+
+  <!-- Python Generator -->
+  <script src="https://cdn.jsdelivr.net/npm/pegjs@0.10.0/dist/pegjs.min.js"></script>
+
+  <!-- Display/UI -->
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.34.1/min/vs/loader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.4.12/src-noconflict/ace.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prettier@2.3.0/standalone.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prettier@2.3.0/parser-babel.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.58.0/lib/codemirror.js"></script>
+
+  <!-- Utilities -->
+  <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+
+  <!-- UI Enhancement -->
+  <script src="https://cdn.jsdelivr.net/npm/tippy.js@6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.3/dist/purify.min.js"></script>
+
+  <!-- Optional Enhancement -->
+  <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
+
+  <!-- Custom Script for Converter -->
+  <script src="converter.js"></script>
+
+ 
+  
+  <!-- CSS for Styling -->
   <style>
     body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f7f6;
+      color: #333;
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #f0f2f5;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 80%;
+      max-width: 1200px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #6a5acd;
+    }
+
+    .textarea-container {
+      margin: 20px 0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
     }
-    header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-    header img {
-      width: 40px;
-      height: 40px;
-    }
-    h1 {
-      font-size: 1.6rem;
-      margin: 0;
-      color: #333;
-    }
-    #editorContainer {
-      display: flex;
-      gap: 20px;
+
+    .textarea-container textarea {
       width: 100%;
-      max-width: 1200px;
-      height: 400px;
-    }
-    .editor-box {
-      flex: 1;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    #buttons {
-      margin-top: 20px;
-      display: flex;
-      gap: 12px;
-    }
-    button {
-      padding: 10px 15px;
+      height: 200px;
+      padding: 10px;
       font-size: 14px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      resize: vertical;
+    }
+
+    .button-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .convert-btn,
+    .clear-btn {
+      background-color: #6a5acd;
+      color: white;
+      padding: 10px 20px;
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      background-color: #4CAF50;
-      color: white;
-      transition: 0.3s;
+      margin: 10px;
+      font-size: 16px;
     }
-    button:hover {
-      background-color: #45a049;
+
+    .convert-btn:hover,
+    .clear-btn:hover {
+      background-color: #483d8b;
+    }
+
+    .output-container {
+      margin-top: 30px;
+    }
+
+    .output-container pre {
+      background-color: #f5f5f5;
+      border-radius: 5px;
+      padding: 10px;
+      font-size: 14px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .output-container button {
+      background-color: #28a745;
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .output-container button:hover {
+      background-color: #218838;
     }
   </style>
 </head>
 <body>
-  <header>
-    <img src="https://img.icons8.com/external-flatart-icons-outline-flatarticons/64/code.png" alt="Converter Icon"/>
+
+  <div class="container">
     <h1>JavaScript to Python Converter</h1>
-  </header>  <div id="editorContainer">
-    <div class="editor-box" id="inputEditor"></div>
-    <div class="editor-box" id="outputEditor"></div>
-  </div>  <div id="buttons">
-    <button onclick="convertCode()"><i class="fas fa-exchange-alt"></i> Convert</button>
-    <button onclick="clearInput()"><i class="fas fa-eraser"></i> Clear Input</button>
-    <button onclick="clearOutput()"><i class="fas fa-trash"></i> Clear Output</button>
-    <button onclick="copyOutput()"><i class="fas fa-copy"></i> Copy Output</button>
-  </div>  <!-- Monaco Editor -->  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.43.0/min/vs/loader.js"></script>  <!-- 50 Useful Libraries (listed by category and included below if CDN available) -->  <script src="https://cdn.jsdelivr.net/npm/esprima/dist/esprima.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/acorn/dist/acorn.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/recast/recast.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/estraverse/estraverse.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/prettier@2.8.8/standalone.js"></script>  <script src="https://cdn.jsdelivr.net/npm/prettier@2.8.8/parser-babel.js"></script>  <script src="https://cdn.jsdelivr.net/npm/shift-parser/dist/shift-parser.js"></script>  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.10/lib/codemirror.js"></script>  <script src="https://cdn.jsdelivr.net/npm/babel-standalone/babel.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/pegjs/lib/peg.js"></script>  <script src="https://cdn.jsdelivr.net/npm/antlr4/index.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/lodash/lodash.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/moment/moment.js"></script>  <script src="https://cdn.jsdelivr.net/npm/json5/dist/index.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/js-beautify/js/lib/beautify.js"></script>  <script src="https://cdn.jsdelivr.net/npm/js-tokens/index.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/fast-deep-equal/index.js"></script>  <!-- (Add 30+ more here as needed...) -->  <!-- Monaco Init -->  <script>
-    let inputEditor, outputEditor;
-    require.config({ paths: { vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.43.0/min/vs" } });
-    require(["vs/editor/editor.main"], function () {
-      inputEditor = monaco.editor.create(document.getElementById("inputEditor"), {
-        value: "// Your JavaScript code here",
-        language: "javascript",
-        theme: "vs-dark",
-        automaticLayout: true
-      });
-      outputEditor = monaco.editor.create(document.getElementById("outputEditor"), {
-        value: "# Python output will appear here",
-        language: "python",
-        theme: "vs-light",
-        automaticLayout: true
-      });
-    });
+    
+    <!-- Input Area -->
+    <div class="textarea-container">
+      <label for="js-code">Enter JavaScript Code</label>
+      <textarea id="js-code" placeholder="Type your JavaScript code here..."></textarea>
+    </div>
+    
+    <!-- Buttons -->
+    <div class="button-container">
+      <button class="convert-btn" onclick="convertJsToPython()">Convert to Python</button>
+      <button class="clear-btn" onclick="clearInput()">Clear Input</button>
+    </div>
+
+    <!-- Output Area -->
+    <div class="output-container">
+      <label for="python-code">Converted Python Code</label>
+      <pre id="python-code"></pre>
+      <button onclick="copyPythonCode()">Copy Python Code</button>
+    </div>
+  </div>
+
+  <script>
+    // Add your JavaScript-to-Python conversion logic here
+    function convertJsToPython() {
+      const jsCode = document.getElementById('js-code').value;
+      let pythonCode = convertLogic(jsCode);
+      document.getElementById('python-code').innerText = pythonCode;
+    }
+
+    function convertLogic(jsCode) {
+      // Custom conversion logic using the 50 libraries
+      // Placeholder for actual conversion logic
+      return jsCode.replace(/console\.log/g, 'print'); // simple example
+    }
 
     function clearInput() {
-      inputEditor.setValue('');
+      document.getElementById('js-code').value = '';
+      document.getElementById('python-code').innerText = '';
     }
-    function clearOutput() {
-      outputEditor.setValue('');
+
+    function copyPythonCode() {
+      const pythonCode = document.getElementById('python-code').innerText;
+      navigator.clipboard.writeText(pythonCode).then(function() {
+        alert('Python code copied to clipboard!');
+      });
     }
-    function copyOutput() {
-      navigator.clipboard.writeText(outputEditor.getValue());
-      alert('Python code copied!');
-    }
-    for (let i = 1; i <= 100; i++) {
-      const script = document.createElement("script");
-      script.src = `backend/backend${i}.js`;
-      document.body.appendChild(script);
-    }
-    function convertCode() {
-      const jsCode = inputEditor.getValue();
-      if (typeof convertAll === "function") {
-        const pyCode = convertAll(jsCode);
-        outputEditor.setValue(pyCode);
-      } else {
-        alert("Conversion engine not ready.");
-      }
-    }
-  </script></body>
+  </script>
+</body>
 </html>
