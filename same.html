@@ -1,142 +1,120 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Smart Paragraph Summarizer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JavaScript to Python Converter</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      padding: 0;
-      background: #f9fafb;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      min-height: 100vh;
+      padding: 20px;
     }
-    .container {
-      background: #ffffff;
-      padding: 30px;
-      width: 90%;
-      max-width: 960px;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #111827;
-    }
-    textarea {
-      width: 100%;
-      min-height: 160px;
-      padding: 15px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      resize: vertical;
-      box-sizing: border-box;
-    }
-    .buttons {
+    header {
       display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 15px;
-      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    header img {
+      width: 40px;
+      height: 40px;
+    }
+    h1 {
+      font-size: 1.6rem;
+      margin: 0;
+      color: #333;
+    }
+    #editorContainer {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+      max-width: 1200px;
+      height: 400px;
+    }
+    .editor-box {
+      flex: 1;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    #buttons {
+      margin-top: 20px;
+      display: flex;
+      gap: 12px;
     }
     button {
-      padding: 10px 20px;
-      background-color: #2563eb;
-      color: white;
+      padding: 10px 15px;
+      font-size: 14px;
       border: none;
-      border-radius: 6px;
+      border-radius: 5px;
       cursor: pointer;
-      font-size: 15px;
+      background-color: #4CAF50;
+      color: white;
+      transition: 0.3s;
     }
     button:hover {
-      background-color: #1d4ed8;
-    }
-    #output {
-      margin-top: 20px;
-      padding: 15px;
-      min-height: 120px;
-      background-color: #f3f4f6;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      white-space: pre-wrap;
+      background-color: #45a049;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Smart Paragraph Summarizer</h2>
-    <textarea id="inputText" placeholder="Paste or write your paragraph here..."></textarea>
-    <div class="buttons">
-      <button onclick="summarize()">Summarize</button>
-      <button onclick="copyOutput()">Copy Summary</button>
-      <button onclick="clearInput()">Clear Input</button>
-      <button onclick="clearOutput()">Clear Output</button>
-    </div>
-    <div id="output" placeholder="Your summary will appear here..."></div>
-  </div>
-
-  <script>
-    function getWordFreq(text) {
-      const freq = {};
-      const words = text.toLowerCase().replace(/[^\w\s]/g, "").split(/\s+/);
-      for (const word of words) {
-        if (!freq[word]) freq[word] = 0;
-        freq[word]++;
-      }
-      return freq;
-    }
-
-    function scoreSentences(sentences, wordFreq) {
-      const scores = [];
-      for (const sentence of sentences) {
-        let score = 0;
-        const words = sentence.toLowerCase().replace(/[^\w\s]/g, "").split(/\s+/);
-        for (const word of words) {
-          if (wordFreq[word]) score += wordFreq[word];
-        }
-        scores.push({ sentence, score });
-      }
-      return scores;
-    }
-
-    function summarize() {
-      const text = document.getElementById("inputText").value.trim();
-      if (!text) {
-        document.getElementById("output").innerText = "Please enter a paragraph.";
-        return;
-      }
-
-      const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-      const wordFreq = getWordFreq(text);
-      const scored = scoreSentences(sentences, wordFreq);
-
-      scored.sort((a, b) => b.score - a.score);
-
-      const topSentences = scored.slice(0, Math.ceil(sentences.length / 3));
-      const summary = topSentences.map(s => s.sentence.trim()).join(" ");
-      document.getElementById("output").innerText = summary;
-    }
-
-    function copyOutput() {
-      const summary = document.getElementById("output").innerText;
-      if (!summary) return;
-      navigator.clipboard.writeText(summary).then(() => {
-        alert("Summary copied to clipboard!");
+  <header>
+    <img src="https://img.icons8.com/external-flatart-icons-outline-flatarticons/64/code.png" alt="Converter Icon"/>
+    <h1>JavaScript to Python Converter</h1>
+  </header>  <div id="editorContainer">
+    <div class="editor-box" id="inputEditor"></div>
+    <div class="editor-box" id="outputEditor"></div>
+  </div>  <div id="buttons">
+    <button onclick="convertCode()"><i class="fas fa-exchange-alt"></i> Convert</button>
+    <button onclick="clearInput()"><i class="fas fa-eraser"></i> Clear Input</button>
+    <button onclick="clearOutput()"><i class="fas fa-trash"></i> Clear Output</button>
+    <button onclick="copyOutput()"><i class="fas fa-copy"></i> Copy Output</button>
+  </div>  <!-- Monaco Editor -->  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.43.0/min/vs/loader.js"></script>  <!-- 50 Useful Libraries (listed by category and included below if CDN available) -->  <script src="https://cdn.jsdelivr.net/npm/esprima/dist/esprima.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/acorn/dist/acorn.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/recast/recast.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/estraverse/estraverse.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/prettier@2.8.8/standalone.js"></script>  <script src="https://cdn.jsdelivr.net/npm/prettier@2.8.8/parser-babel.js"></script>  <script src="https://cdn.jsdelivr.net/npm/shift-parser/dist/shift-parser.js"></script>  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.10/lib/codemirror.js"></script>  <script src="https://cdn.jsdelivr.net/npm/babel-standalone/babel.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/pegjs/lib/peg.js"></script>  <script src="https://cdn.jsdelivr.net/npm/antlr4/index.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/lodash/lodash.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/moment/moment.js"></script>  <script src="https://cdn.jsdelivr.net/npm/json5/dist/index.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/js-beautify/js/lib/beautify.js"></script>  <script src="https://cdn.jsdelivr.net/npm/js-tokens/index.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/fast-deep-equal/index.js"></script>  <!-- (Add 30+ more here as needed...) -->  <!-- Monaco Init -->  <script>
+    let inputEditor, outputEditor;
+    require.config({ paths: { vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.43.0/min/vs" } });
+    require(["vs/editor/editor.main"], function () {
+      inputEditor = monaco.editor.create(document.getElementById("inputEditor"), {
+        value: "// Your JavaScript code here",
+        language: "javascript",
+        theme: "vs-dark",
+        automaticLayout: true
       });
-    }
+      outputEditor = monaco.editor.create(document.getElementById("outputEditor"), {
+        value: "# Python output will appear here",
+        language: "python",
+        theme: "vs-light",
+        automaticLayout: true
+      });
+    });
 
     function clearInput() {
-      document.getElementById("inputText").value = "";
+      inputEditor.setValue('');
     }
-
     function clearOutput() {
-      document.getElementById("output").innerText = "";
+      outputEditor.setValue('');
     }
-  </script>
-</body>
+    function copyOutput() {
+      navigator.clipboard.writeText(outputEditor.getValue());
+      alert('Python code copied!');
+    }
+    for (let i = 1; i <= 100; i++) {
+      const script = document.createElement("script");
+      script.src = `backend/backend${i}.js`;
+      document.body.appendChild(script);
+    }
+    function convertCode() {
+      const jsCode = inputEditor.getValue();
+      if (typeof convertAll === "function") {
+        const pyCode = convertAll(jsCode);
+        outputEditor.setValue(pyCode);
+      } else {
+        alert("Conversion engine not ready.");
+      }
+    }
+  </script></body>
 </html>
